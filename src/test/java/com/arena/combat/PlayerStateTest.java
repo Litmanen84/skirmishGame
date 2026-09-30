@@ -99,4 +99,22 @@ class PlayerStateTest {
         assertThat(player.getDefenseBuff()).isEqualTo(0);
         assertThat(player.hasActiveBuffs()).isFalse();
     }
+
+    @Test
+    @DisplayName("Should strictly cap player hand size at 10 cards")
+    void shouldCapHandAtTenCards() {
+        List<Card> cards = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            cards.add(Card.strike());
+        }
+        PlayerState player = new PlayerState("P1", 30, new Deck(cards));
+
+        // Draw 15 cards
+        for (int i = 0; i < 15; i++) {
+            player.drawCard();
+        }
+
+        // Hand must not exceed 10 cards
+        assertThat(player.getHand()).hasSize(10);
+    }
 }

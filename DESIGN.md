@@ -7,12 +7,22 @@
 - **Starting Mana**: 0 Mana at turn start, increments by 1 at the beginning of each turn's Mana Phase (capped at 10 Mana). Each card costs an amount of mana strictly scaled to its strength.
 - **Hand & Deck**:
   - Starting hand size: 10 cards drawn on match start to maximize tactical variety and randomization.
-  - Draw rate: 1 card per turn during Draw Phase.
+  - Hand size capacity: Strict maximum cap of 10 cards in hand; cards are replenished up to 10 during the Draw Phase (a bot never holds more than 10 cards).
+  - Draw rate: 1 card per turn during Draw Phase (if hand size < 10).
   - Deck size: 26-card balanced and randomized decks.
   - Card recycling: Once a card is played from hand, it goes to the discard pile and cannot be replayed until the draw deck is exhausted. Upon draw exhaustion, all discarded cards are reshuffled back into the draw deck.
 - **Play Phase Limits**: Standard limit of 1 card played per round, unless a card with bonus action allowance (`extraPlays > 0`) is played (e.g. *Quick Slash*, *Twin Strike*, *Adrenaline*, *Flurry of Strikes*).
 - **Match Logging & Spectator Feedback**: Every played card outputs a spectator summary specification line detailing its mana cost, card type, direct damage/shield/heal value, multi-round buffs, and extra action enablers.
 - **Max Turns**: 50 turns per match.
+
+## Bot Decision Strategies
+
+- **AggressiveBot**:
+  - *Damage Maximization*: Whenever affordable attack cards are in hand, it evaluates all available attacks within the current mana budget and deterministically plays the card dealing the highest direct damage (accounting for active attack buffs and bonus play enablers).
+  - *Fallback Selection*: When no direct attack is playable within current mana, it plays the most beneficial card allowed by its mana pool (resources to accelerate mana, attack buffs to empower upcoming attacks, shields for mitigation, or utility heals).
+- **DefensiveBot**:
+  - *Survival Priority*: When HP drops to 15 or below, it prioritizes defensive shields and healing cards before considering attacks.
+  - *Normal Posture*: When HP > 15, it plays the highest-value attacks and buffs within available mana.
 
 ## Card Categories & Pool
 

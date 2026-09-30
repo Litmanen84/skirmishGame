@@ -10,6 +10,8 @@ import java.util.Optional;
  * Encapsulates mutable combat state for an individual player throughout a match lifecycle.
  */
 public class PlayerState {
+    public static final int MAX_HAND_SIZE = 10;
+
     private final String id;
     private final int maxHp;
     private int currentHp;
@@ -72,13 +74,17 @@ public class PlayerState {
     }
 
     /**
-     * Draws a card into the player's hand, recycling the discard pile if the deck is empty.
+     * Draws a card into the player's hand (capped at maximum hand size of 10),
+     * recycling the discard pile if the deck is empty.
      *
-     * @return optional containing the drawn card, or empty if no cards are available
+     * @return optional containing the drawn card, or empty if no cards are available or hand is full
      */
     public Optional<Card> drawCard() {
         lastDrawReshuffled = false;
         lastReshuffleCount = 0;
+        if (hand.size() >= MAX_HAND_SIZE) {
+            return Optional.empty();
+        }
         Optional<Card> drawn = deck.draw();
         if (drawn.isEmpty() && !discardPile.isEmpty()) {
             lastDrawReshuffled = true;

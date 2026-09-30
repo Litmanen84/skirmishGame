@@ -52,4 +52,22 @@ class AggressiveBotTest {
         // Quick Slash grants +1 extra play, allowing subsequent Heavy Slash within 4 mana
         assertThat(plays).containsExactly(quickSlash, heavySlash);
     }
+
+    @Test
+    @DisplayName("Should fallback to playable card allowed by mana pool when no attack card is affordable")
+    void shouldFallbackWhenNoAttackIsAffordable() {
+        AggressiveBot bot = new AggressiveBot();
+        Card fireball = Card.fireball();         // Cost 5, Value 14 (unaffordable at 2 mana)
+        Card meteorStrike = Card.meteorStrike(); // Cost 6, Value 18 (unaffordable at 2 mana)
+        Card sharpenBlade = Card.sharpenBlade(); // Cost 1, AtkBuff +2
+        Card guard = Card.guard();               // Cost 1, Value 4
+
+        PlayerView self = new PlayerView("P1", 30, 30, 2, 0, List.of(fireball, meteorStrike, sharpenBlade, guard));
+        PlayerView opp = new PlayerView("P2", 30, 30, 0, 0, List.of());
+
+        List<Card> plays = bot.selectPlays(self, opp);
+
+        // With no affordable attack, bot plays the attack buff to empower future rounds
+        assertThat(plays).containsExactly(sharpenBlade);
+    }
 }

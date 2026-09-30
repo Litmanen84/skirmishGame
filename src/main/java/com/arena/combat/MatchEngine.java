@@ -102,9 +102,16 @@ public class MatchEngine {
             events.add(new CombatEvent(turn, active.getId(),
                     active.getId() + " deck exhausted! Reshuffled " + active.getLastReshuffleCount() + " cards from discard pile into draw deck."));
         }
-        String drawnText = drawn.map(c -> " (" + c.name() + ")").orElse(" (Deck empty)");
-        events.add(new CombatEvent(turn, active.getId(),
-                active.getId() + " draws a card" + drawnText + " [Hand: " + active.getHand().size() + " cards, Deck: " + active.getDeckSize() + " left]"));
+        if (drawn.isPresent()) {
+            events.add(new CombatEvent(turn, active.getId(),
+                    active.getId() + " draws a card (" + drawn.get().name() + ") [Hand: " + active.getHand().size() + "/10 cards, Deck: " + active.getDeckSize() + " left]"));
+        } else if (active.getHand().size() >= PlayerState.MAX_HAND_SIZE) {
+            events.add(new CombatEvent(turn, active.getId(),
+                    active.getId() + " holds full hand [Hand: " + active.getHand().size() + "/10 cards, Deck: " + active.getDeckSize() + " left]"));
+        } else {
+            events.add(new CombatEvent(turn, active.getId(),
+                    active.getId() + " draws no card (Deck empty) [Hand: " + active.getHand().size() + "/10 cards, Deck: 0 left]"));
+        }
 
         // 2. Mana phase
         active.startTurnMana();
