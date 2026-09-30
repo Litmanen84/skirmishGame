@@ -1,0 +1,7 @@
+com\arena\simulation\VictoryHistoryTrackerTest.class
+com\arena\cards\DeckTest.class
+com\arena\bot\DefensiveBotTest.class
+com\arena\simulation\ArenaSimulationServiceTest.class
+com\arena\bot\AggressiveBotTest.class
+com\arena\combat\PlayerStateTest.class
+com\arena\combat\MatchEngineTest.class
