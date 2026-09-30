@@ -19,7 +19,7 @@ class DefensiveBotTest {
     }
 
     @Test
-    @DisplayName("Should prioritize defense and healing when HP is at or below 15")
+    @DisplayName("Should prioritize defense and healing when HP is at or below 15 under 1-card limit")
     void shouldPrioritizeDefenseWhenHpLow() {
         DefensiveBot bot = new DefensiveBot();
         Card strike = Card.strike();   // Cost 1, Value 3 (Attack)
@@ -32,12 +32,12 @@ class DefensiveBotTest {
 
         List<Card> plays = bot.selectPlays(self, opp);
 
-        // Defensive bot should play Heal (Cost 2) and Guard (Cost 1) before Strike
-        assertThat(plays).containsExactly(heal, guard);
+        // Defensive bot plays the highest-value restorative card: Heal (Cost 2, Value 5)
+        assertThat(plays).containsExactly(heal);
     }
 
     @Test
-    @DisplayName("Should attack when HP is above 15")
+    @DisplayName("Should attack when HP is above 15 under 1-card limit")
     void shouldAttackWhenHpIsHigh() {
         DefensiveBot bot = new DefensiveBot();
         Card strike = Card.strike();         // Cost 1, Value 3
@@ -50,7 +50,23 @@ class DefensiveBotTest {
 
         List<Card> plays = bot.selectPlays(self, opp);
 
-        // Attacks take priority when healthy
-        assertThat(plays).containsExactly(heavySlash, strike);
+        // Highest damage attack card takes priority when healthy
+        assertThat(plays).containsExactly(heavySlash);
+    }
+
+    @Test
+    @DisplayName("Should chain extra play cards before resolving subsequent actions")
+    void shouldChainExtraPlayCardsWhenDefending() {
+        DefensiveBot bot = new DefensiveBot();
+        Card quickSlash = Card.quickSlash(); // Cost 1, Value 3, +1 Extra Play
+        Card heal = Card.heal();             // Cost 2, Value 5
+
+        PlayerView self = new PlayerView("P1", 10, 30, 3, 0, List.of(quickSlash, heal));
+        PlayerView opp = new PlayerView("P2", 30, 30, 0, 0, List.of());
+
+        List<Card> plays = bot.selectPlays(self, opp);
+
+        // Quick Slash grants extra play, allowing both Quick Slash and Heal to be played with 3 mana
+        assertThat(plays).containsExactly(quickSlash, heal);
     }
 }

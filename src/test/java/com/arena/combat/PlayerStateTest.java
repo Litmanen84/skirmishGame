@@ -64,4 +64,39 @@ class PlayerStateTest {
         assertThat(player.drawCard()).contains(strike);
         assertThat(player.getHand()).hasSize(1);
     }
+
+    @Test
+    @DisplayName("Should manage multi-turn temporary attack and defense buffs lifecycle")
+    void shouldManageBuffsLifecycle() {
+        PlayerState player = new PlayerState("P1", 30, new Deck(List.of()));
+        assertThat(player.hasActiveBuffs()).isFalse();
+
+        // Apply +3 Attack and +4 Defense for 2 rounds
+        player.applyBuffs(3, 4, 2);
+        assertThat(player.hasActiveBuffs()).isTrue();
+        assertThat(player.getAttackBuff()).isEqualTo(3);
+        assertThat(player.getAttackBuffDuration()).isEqualTo(2);
+        assertThat(player.getDefenseBuff()).isEqualTo(4);
+        assertThat(player.getDefenseBuffDuration()).isEqualTo(2);
+
+        // Turn start defense buff triggers
+        int gainedShield = player.applyTurnStartDefenseBuff();
+        assertThat(gainedShield).isEqualTo(4);
+        assertThat(player.getActiveShield()).isEqualTo(4);
+
+        // End of round 1: duration decreases to 1
+        player.endTurnBuffs();
+        assertThat(player.getAttackBuffDuration()).isEqualTo(1);
+        assertThat(player.getDefenseBuffDuration()).isEqualTo(1);
+        assertThat(player.getAttackBuff()).isEqualTo(3);
+        assertThat(player.getDefenseBuff()).isEqualTo(4);
+
+        // End of round 2: buffs expire and reset to 0
+        player.endTurnBuffs();
+        assertThat(player.getAttackBuffDuration()).isEqualTo(0);
+        assertThat(player.getDefenseBuffDuration()).isEqualTo(0);
+        assertThat(player.getAttackBuff()).isEqualTo(0);
+        assertThat(player.getDefenseBuff()).isEqualTo(0);
+        assertThat(player.hasActiveBuffs()).isFalse();
+    }
 }

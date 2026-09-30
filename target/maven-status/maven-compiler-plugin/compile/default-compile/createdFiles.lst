@@ -8,10 +8,12 @@ com\arena\cards\Deck.class
 com\arena\Main.class
 com\arena\simulation\MatchLogger.class
 com\arena\combat\MatchResult.class
+com\arena\simulation\SimulationResult.class
 com\arena\bot\AggressiveBot.class
 com\arena\bot\BotStrategy.class
 com\arena\cards\CardLibrary.class
 com\arena\combat\PlayerState.class
+com\arena\simulation\ArenaSimulationService$StartingShields.class
 com\arena\bot\DefensiveBot.class
 com\arena\cards\CardType.class
 com\arena\combat\PlayerView.class

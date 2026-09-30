@@ -19,7 +19,7 @@ class AggressiveBotTest {
     }
 
     @Test
-    @DisplayName("Should prioritize highest-damage attack cards within mana budget")
+    @DisplayName("Should prioritize highest-damage attack card within mana budget under standard 1-card limit")
     void shouldPrioritizeHighestDamageCards() {
         AggressiveBot bot = new AggressiveBot();
         Card strike = Card.strike();         // Cost 1, Value 3
@@ -32,7 +32,24 @@ class AggressiveBotTest {
 
         List<Card> plays = bot.selectPlays(self, opp);
 
-        // With 4 mana, bot should play Heavy Slash (cost 3, value 8) then Strike (cost 1, value 3)
-        assertThat(plays).containsExactly(heavySlash, strike);
+        // Under 1-card limit with 4 mana, bot plays the strongest affordable single card: Heavy Slash (cost 3, value 8)
+        assertThat(plays).containsExactly(heavySlash);
+    }
+
+    @Test
+    @DisplayName("Should allow multiple card plays when combo card granting extra play is used")
+    void shouldChainPlaysWhenExtraPlayCardUsed() {
+        AggressiveBot bot = new AggressiveBot();
+        Card quickSlash = Card.quickSlash(); // Cost 1, Value 3, +1 Extra Play
+        Card heavySlash = Card.heavySlash(); // Cost 3, Value 8
+        Card guard = Card.guard();           // Cost 1, Value 4
+
+        PlayerView self = new PlayerView("P1", 30, 30, 4, 0, List.of(quickSlash, guard, heavySlash));
+        PlayerView opp = new PlayerView("P2", 30, 30, 0, 0, List.of());
+
+        List<Card> plays = bot.selectPlays(self, opp);
+
+        // Quick Slash grants +1 extra play, allowing subsequent Heavy Slash within 4 mana
+        assertThat(plays).containsExactly(quickSlash, heavySlash);
     }
 }

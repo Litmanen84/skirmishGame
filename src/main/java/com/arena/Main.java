@@ -3,10 +3,9 @@ package com.arena;
 import com.arena.bot.AggressiveBot;
 import com.arena.bot.BotStrategy;
 import com.arena.bot.DefensiveBot;
-import com.arena.combat.MatchResult;
 import com.arena.simulation.ArenaSimulationService;
 import com.arena.simulation.MatchLogger;
-import com.arena.simulation.MatchStatistics;
+import com.arena.simulation.SimulationResult;
 import com.arena.simulation.VictoryHistoryTracker;
 import com.arena.simulation.VictoryRecord;
 
@@ -71,34 +70,30 @@ public class Main {
         BotStrategy p2Strategy = resolveStrategy(p2Type);
 
         ArenaSimulationService simulationService = new ArenaSimulationService();
+        SimulationResult simulationResult = simulationService.runSimulation(p1Strategy, p2Strategy, matches);
 
         if (matches <= 1) {
-            MatchResult singleMatch = simulationService.runSingleMatch(p1Strategy, p2Strategy);
-            logger.printMatchLog(singleMatch);
+            logger.printMatchLog(simulationResult.firstMatch());
 
             // Record single match victory
-            int totalDamage = singleMatch.events().stream()
-                    .filter(e -> e.description().contains("deals"))
-                    .mapToInt(e -> 0) // or calculate from player stats
-                    .sum();
+            int totalDamage = (int) simulationResult.statistics().averageDamageDealt();
             VictoryRecord record = VictoryRecord.ofSingleMatch(
                     p1Strategy.getName(),
                     p2Strategy.getName(),
-                    singleMatch.winnerId(),
-                    singleMatch.totalTurns(),
+                    simulationResult.firstMatch().winnerId(),
+                    simulationResult.firstMatch().totalTurns(),
                     totalDamage
             );
             historyTracker.recordVictory(record);
         } else {
-            if (verbose) {
-                MatchResult sampleMatch = simulationService.runSingleMatch(p1Strategy, p2Strategy);
-                logger.printMatchLog(sampleMatch);
-            }
-            MatchStatistics stats = simulationService.runSimulation(p1Strategy, p2Strategy, matches);
-            logger.printBatchStatistics(stats, p1Strategy.getName(), p2Strategy.getName());
+            // First match is always fully represented to inspect combat flow
+            logger.printMatchLog(simulationResult.firstMatch());
+
+            // Present aggregate metrics for the full batch run
+            logger.printBatchStatistics(simulationResult.statistics(), p1Strategy.getName(), p2Strategy.getName());
 
             // Record batch simulation victory outcome
-            VictoryRecord record = VictoryRecord.of(p1Strategy.getName(), p2Strategy.getName(), stats);
+            VictoryRecord record = VictoryRecord.of(p1Strategy.getName(), p2Strategy.getName(), simulationResult.statistics());
             historyTracker.recordVictory(record);
         }
 
